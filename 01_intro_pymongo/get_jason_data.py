@@ -2,10 +2,17 @@ import requests
 import json
 from multiprocessing import Pool
 
-def get_apikey(filename='apikey.txt'):
-    """Gets the API key from aux file"""
-    with open(filename, 'r') as f:
-        return f.read().strip()
+def get_access_data(*items, filename='config.json'):
+    with open('config.json') as c:
+        config = json.loads(c.read())
+    if len(items) > 1:
+        return tuple(config.get(item) for item in items)
+    else:
+        try:
+            return config.get(items[0])
+        except IndexError:
+            print('No Access Item Especified')
+            raise
 
 def search_movies(search):
     """Returns list of all movies returned by the OMDb API from the search"""
@@ -44,7 +51,7 @@ def get_movie_data(imdb_id):
 
 if __name__ == '__main__':
 
-    apikey = get_apikey(filename='apikey.txt')
+    apikey = get_access_data('apikey', filename='config.json')
     movies = search_movies("Friday the 13th")
     imdb_ids = [movie["imdbID"] for movie in movies]
     with Pool() as p:
